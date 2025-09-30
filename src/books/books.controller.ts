@@ -8,13 +8,15 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBook } from './dto/create-book.dto';
 import { UpdateBook } from './dto/update-book.dto';
 import { QueryBook } from './dto/query-book.dto';
 import { isValidObjectId } from 'mongoose';
-
+import { AdminGuard } from 'src/guards/admin-guard';
+@UseGuards(AdminGuard)
 @Controller('books')
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}

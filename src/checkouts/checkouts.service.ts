@@ -10,13 +10,37 @@ import { Model } from 'mongoose';
 import { Book } from 'src/schemas/books.schema';
 import { Checkout } from 'src/schemas/checkouts.schema';
 import { InjectModel } from '@nestjs/mongoose';
+import { QueryCheckoutDto } from './dto/query-checkout.dto';
 
 @Injectable()
 export class CheckoutService {
-  constructor(
+    constructor(
     @InjectModel(Checkout.name) private readonly checkoutModel: Model<Checkout>,
     @InjectModel(Book.name) private readonly bookModel: Model<Book>,
   ) {}
+  async getCheckouts(queryCheckoutDto: QueryCheckoutDto) {
+    try {
+        const query:Partial<QueryCheckoutDto> = {}
+        for(const key in queryCheckoutDto){
+          if(queryCheckoutDto[key]!==undefined){
+            query[key] = queryCheckoutDto[key]
+          }
+        }
+    const checkouts = await this.checkoutModel.find(query)
+    return checkouts
+    } catch (error) {
+       if (
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'An error occurred',
+      );
+    }
+     
+  }
+
 
   async returnBook(checkoutId: string) {
     try {

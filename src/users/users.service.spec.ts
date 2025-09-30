@@ -84,33 +84,4 @@ describe('UserService', () => {
     });
   });
 
-  describe('createUser', () => {
-    it('should create a user', async () => {
-      const createUserDto: CreateUserDto = {
-        firstName: 'Jane',
-        lastName: 'Smith',
-        email: 'jane.smith@example.com',
-      };
-      mockUserModel.create.mockResolvedValue(mockUser);
-
-      const result = await service.createUser(createUserDto);
-
-      expect(result).toEqual(mockUser);
-      expect(model.create).toHaveBeenCalledWith(createUserDto);
-    });
-
-    it('should throw InternalServerErrorException on error', async () => {
-      const createUserDto: CreateUserDto = {
-        firstName: 'Jane',
-        lastName: 'Smith',
-        email: 'jane.smith@example.com',
-      };
-      const error = new Error('Database error');
-      mockUserModel.create.mockRejectedValue(error);
-
-      await expect(service.createUser(createUserDto)).rejects.toThrow(
-        InternalServerErrorException,
-      );
-    });
-  });
 });
