@@ -6,15 +6,21 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
 import { isValidObjectId } from 'mongoose';
 import { CheckoutService } from './checkouts.service';
+import { QueryCheckoutDto } from './dto/query-checkout.dto';
 
 @Controller('checkouts')
 export class CheckoutController {
   constructor(private checkoutService: CheckoutService) {}
+  @Get()
+  async getCheckouts(@Query() queryCheckoutDto:QueryCheckoutDto){
+    return this.checkoutService.getCheckouts(queryCheckoutDto)
+  }
   @Get(':bookId')
   async getCheckoutByBookId(@Param('bookId') bookId: string) {
     const isValid = isValidObjectId(bookId);
