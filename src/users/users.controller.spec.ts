@@ -3,6 +3,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { UserController } from './users.controller';
 import { UserService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { AdminGuard } from 'src/guards/admin-guard';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -12,6 +13,10 @@ describe('UserController', () => {
     getAll: jest.fn(),
     getById: jest.fn(),
     createUser: jest.fn(),
+  };
+
+  const mockAdminGuard = {
+    canActivate: jest.fn(() => true),
   };
 
   const mockUser = {
@@ -30,7 +35,10 @@ describe('UserController', () => {
           useValue: mockUserService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(AdminGuard)
+      .useValue(mockAdminGuard)
+      .compile();
 
     controller = module.get<UserController>(UserController);
     service = module.get<UserService>(UserService);
@@ -51,6 +59,7 @@ describe('UserController', () => {
       expect(result).toEqual(expectedUsers);
       expect(service.getAll).toHaveBeenCalled();
     });
+
   });
 
   describe('getById', () => {
@@ -76,21 +85,7 @@ describe('UserController', () => {
       expect(result).toBeInstanceOf(NotFoundException);
       expect(service.getById).toHaveBeenCalledWith('507f1f77bcf86cd799439011');
     });
+
   });
 
-  describe('createUser', () => {
-    it('should create a new user', async () => {
-      const createUserDto: CreateUserDto = {
-        firstName: 'Jane',
-        lastName: 'Smith',
-        email: 'jane.smith@example.com',
-      };
-      mockUserService.createUser.mockResolvedValue(mockUser);
-
-      const result = await controller.createUser(createUserDto);
-
-      expect(result).toEqual(mockUser);
-      expect(service.createUser).toHaveBeenCalledWith(createUserDto);
-    });
-  });
 });

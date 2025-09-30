@@ -21,7 +21,7 @@ export class BooksService {
   }
   async updateBook(id: string, update: UpdateBook) {
     try {
-      return await this.bookModel.findByIdAndUpdate(id, update);
+      return await this.bookModel.findByIdAndUpdate(id, update, { new: true });
     } catch (error) {
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'An error occurred',

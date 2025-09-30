@@ -6,11 +6,12 @@ import {
   NotFoundException,
   Param,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { isValidObjectId } from 'mongoose';
-
+import { AdminGuard } from 'src/guards/admin-guard';
+@UseGuards(AdminGuard)
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
@@ -26,9 +27,5 @@ export class UserController {
     const user = await this.userService.getById(id);
     if (!user) return new NotFoundException('User not found.');
     return user;
-  }
-  @Post()
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
   }
 }

@@ -3,15 +3,22 @@ import { BadRequestException } from '@nestjs/common';
 import { CheckoutController } from './checkouts.controllers';
 import { CheckoutService } from './checkouts.service';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
+import { QueryCheckoutDto } from './dto/query-checkout.dto';
+import { AdminGuard } from 'src/guards/admin-guard';
 
 describe('CheckoutController', () => {
   let controller: CheckoutController;
   let service: CheckoutService;
 
   const mockCheckoutService = {
+    getCheckouts: jest.fn(),
     getCheckoutByBookId: jest.fn(),
     create: jest.fn(),
     returnBook: jest.fn(),
+  };
+
+  const mockAdminGuard = {
+    canActivate: jest.fn(() => true),
   };
 
   const mockCheckout = {
@@ -36,7 +43,10 @@ describe('CheckoutController', () => {
           useValue: mockCheckoutService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(AdminGuard)
+      .useValue(mockAdminGuard)
+      .compile();
 
     controller = module.get<CheckoutController>(CheckoutController);
     service = module.get<CheckoutService>(CheckoutService);
@@ -45,6 +55,34 @@ describe('CheckoutController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('getCheckouts', () => {
+    it('should return an array of checkouts with query parameters', async () => {
+      const queryCheckoutDto: QueryCheckoutDto = {
+        user: '507f1f77bcf86cd799439013',
+        borrowedAt: new Date('2023-01-01'),
+      };
+      const expectedCheckouts = [mockCheckout];
+      mockCheckoutService.getCheckouts.mockResolvedValue(expectedCheckouts);
+
+      const result = await controller.getCheckouts(queryCheckoutDto);
+
+      expect(result).toEqual(expectedCheckouts);
+      expect(service.getCheckouts).toHaveBeenCalledWith(queryCheckoutDto);
+    });
+
+    it('should return all checkouts when no query parameters provided', async () => {
+      const queryCheckoutDto: QueryCheckoutDto = {};
+      const expectedCheckouts = [mockCheckout, mockReturnedCheckout];
+      mockCheckoutService.getCheckouts.mockResolvedValue(expectedCheckouts);
+
+      const result = await controller.getCheckouts(queryCheckoutDto);
+
+      expect(result).toEqual(expectedCheckouts);
+      expect(service.getCheckouts).toHaveBeenCalledWith(queryCheckoutDto);
+    });
+
   });
 
   describe('getCheckoutByBookId', () => {

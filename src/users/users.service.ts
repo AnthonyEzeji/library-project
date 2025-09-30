@@ -26,13 +26,4 @@ export class UserService {
       );
     }
   }
-  async createUser(createUserDto: CreateUserDto) {
-    try {
-      return await this.userModel.create(createUserDto);
-    } catch (err) {
-      throw new InternalServerErrorException(
-        err instanceof Error ? err.message : 'An error occurred',
-      );
-    }
-  }
 }
